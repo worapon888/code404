@@ -1,24 +1,34 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
-import Image from "next/image";
 import { Canvas } from "@react-three/fiber";
 import ComplexLines from "./ComplexLines";
 import { Suspense } from "react";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
+import { FloatingParticlesGroup } from "./FloatingParticlesGroup";
+import { ParallaxTiltEffect } from "./ParallaxTiltEffect";
+import EnableSoundButton from "./AmbientSound";
+import "./GlitchMaterial";
+import GlitchLogo from "./GlitchLogo";
+import WormholeCameraZoom from "./WormholeCameraZoom";
+import FloatingBubbles from "./FloatingBubbles";
 
-// ✅ Canvas background with Bloom & Suspense
-function CanvasBG() {
+function CanvasBG({ isLoaded }: { isLoaded: boolean }) {
   return (
     <Canvas
-      camera={{ position: [0, 0, 6], fov: 50, near: 0.1, far: 100 }}
+      camera={{ position: [0, 0, 6], fov: 50, near: 0.1 }}
       gl={{ antialias: true }}
       className="absolute inset-0 z-0"
     >
       <ambientLight intensity={1} />
       <Suspense fallback={null}>
+        <FloatingParticlesGroup layer={2} />
+        <FloatingParticlesGroup layer={1} />
         <ComplexLines />
+        <FloatingBubbles isLoaded={isLoaded} />
+        <GlitchLogo isLoaded={isLoaded} />
+        <WormholeCameraZoom isLoaded={isLoaded} />
         <EffectComposer>
           <Bloom intensity={1.4} luminanceThreshold={0.1} />
         </EffectComposer>
@@ -31,14 +41,34 @@ export default function Hero() {
   const containerRef = useRef(null);
   const logoRef = useRef(null);
   const subRef = useRef(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
+  // simulate loading 0-100%
   useEffect(() => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += Math.random() * 5 + 2; // เพิ่มแบบสุ่ม
+      if (progress >= 100) {
+        progress = 100;
+        clearInterval(interval);
+        setTimeout(() => setIsLoaded(true), 300); // delay ก่อนแสดงโลโก้
+      }
+      setLoadingProgress(progress);
+    }, 60);
+    return () => clearInterval(interval);
+  }, []);
+
+  // animate in logo after loaded
+  useEffect(() => {
+    if (!isLoaded) return;
+
     const ctx = gsap.context(() => {
       gsap.fromTo(
         logoRef.current,
         { opacity: 0, y: 60, scale: 1.1 },
         {
-          opacity: 1, // ✅ ชัดเจนขึ้น
+          opacity: 1,
           y: 0,
           scale: 1,
           duration: 2.2,
@@ -50,45 +80,44 @@ export default function Hero() {
         subRef.current,
         { opacity: 0, y: 20 },
         {
-          opacity: 0.7, // ✅ ยังเบาอยู่แต่ไม่จางเกินไป
+          opacity: 0.7,
           y: 0,
           duration: 1.8,
           delay: 1.2,
           ease: "power2.out",
         }
       );
-    }, containerRef); // ✅ สร้าง context ให้ชัดเจน
+    }, containerRef);
 
-    return () => ctx.revert(); // ✅ Cleanup animations
-  }, []);
+    return () => ctx.revert();
+  }, [isLoaded]);
 
   return (
     <section
       ref={containerRef}
       className="relative w-full h-screen bg-black text-white flex items-center justify-center overflow-hidden"
     >
-      <CanvasBG />
+      <EnableSoundButton />
+      <ParallaxTiltEffect>
+        <CanvasBG isLoaded={isLoaded} />
+      </ParallaxTiltEffect>
 
-      {/* Centered Text Content */}
-      <div className="absolute z-10 text-center space-y-5 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-        <div ref={logoRef} className="inline-block">
-          <Image
-            src="/logo_code404.png"
-            alt="Code404 Logo"
-            width={420}
-            height={200}
-            className="w-auto h-auto mx-auto"
-            priority
-          />
+      {/* 🔵 Loading screen */}
+      {!isLoaded && (
+        <div className="absolute inset-0 z-20 bg-black flex flex-col items-center justify-center text-white space-y-4">
+          <p className="text-sm font-mono tracking-wide">
+            Loading {Math.floor(loadingProgress)}%
+          </p>
+          <div className="w-48 h-2 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-cyan-400 transition-all duration-100 ease-linear"
+              style={{ width: `${loadingProgress}%` }}
+            />
+          </div>
         </div>
+      )}
 
-        <p
-          ref={subRef}
-          className="text-sm md:text-base font-mono text-white/70 tracking-wide backdrop-blur-sm mix-blend-screen"
-        >
-          Creating software that feels.
-        </p>
-      </div>
+      {/* 🔥 Logo + tagline after load */}
     </section>
   );
 }
