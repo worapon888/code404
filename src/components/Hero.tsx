@@ -12,7 +12,7 @@ import { EffectComposer, Bloom } from "@react-three/postprocessing";
 function CanvasBG() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 6], fov: 50 }}
+      camera={{ position: [0, 0, 6], fov: 50, near: 0.1, far: 100 }}
       gl={{ antialias: true }}
       className="absolute inset-0 z-0"
     >

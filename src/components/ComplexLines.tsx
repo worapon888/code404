@@ -1,10 +1,12 @@
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
+import FloatingParticles from "./FloatingParticles";
 
 export default function ComplexLines() {
   const groupRef = useRef<THREE.Group>(null);
   const scrollRef = useRef(0);
+  const pointsRef = useRef<THREE.Points>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +20,14 @@ export default function ComplexLines() {
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y = t * 0.1;
+
+      // ✨ Fade effect: เปลี่ยน opacity ไปมา (pulse)
+      const mat = pointsRef.current.material as THREE.PointsMaterial;
+      mat.opacity = 0.1 + Math.abs(Math.sin(t * 0.8)) * 0.25;
+    }
+
     if (groupRef.current) {
       const scrollAmount = scrollRef.current * 0.001; // ปรับ sensitivity ได้
       groupRef.current.rotation.z = t * 0.05 + scrollAmount;
@@ -26,19 +36,19 @@ export default function ComplexLines() {
     // 🌀 วงกลมไหว
     rings.forEach((ring, i) => {
       const material = ring.material as THREE.LineBasicMaterial;
-      material.opacity = 0.001 + Math.sin(t * 1.5 + i) * 0.01;
+      material.opacity = 0.0005 + Math.sin(t * 1.5 + i) * 0.01;
     });
 
     // 🔲 สี่เหลี่ยมพริ้ว
     squares.forEach((square, i) => {
       const material = square.material as THREE.LineBasicMaterial;
-      material.opacity = 0.001 + Math.sin(t * 2 + i) * 0.02;
+      material.opacity = 0.0005 + Math.sin(t * 2 + i) * 0.02;
     });
 
     // ⬡ Polygon พริ้วบาง ๆ
     polygons.forEach((polygon, i) => {
       const material = polygon.material as THREE.LineBasicMaterial;
-      material.opacity = 0.001 + Math.sin(t * 1.8 + i) * 0.01;
+      material.opacity = 0.0005 + Math.sin(t * 1.8 + i) * 0.01;
     });
   });
 
@@ -127,23 +137,26 @@ export default function ComplexLines() {
   }
 
   return (
-    <group ref={groupRef}>
-      <mesh position={[0, 0, -0.01]} scale={[0.9, 0.9, 0.9]}>
-        <circleGeometry args={[1.3, 64]} />
-        <meshBasicMaterial color="black" />
-      </mesh>
-      {diagonals.map((line, idx) => (
-        <primitive key={`diag-${idx}`} object={line} />
-      ))}
-      {polygons.map((poly, idx) => (
-        <primitive key={`poly-${idx}`} object={poly} />
-      ))}
-      {squares.map((square, idx) => (
-        <primitive key={`square-${idx}`} object={square} />
-      ))}
-      {rings.map((ring, idx) => (
-        <primitive key={`ring-${idx}`} object={ring} />
-      ))}
-    </group>
+    <>
+      <group ref={groupRef}>
+        <FloatingParticles count={200} />
+        <mesh position={[0, 0, -0.01]} scale={[0.9, 0.9, 0.9]}>
+          <circleGeometry args={[1.3, 64]} />
+          <meshBasicMaterial color="black" />
+        </mesh>
+        {diagonals.map((line, idx) => (
+          <primitive key={`diag-${idx}`} object={line} />
+        ))}
+        {polygons.map((poly, idx) => (
+          <primitive key={`poly-${idx}`} object={poly} />
+        ))}
+        {squares.map((square, idx) => (
+          <primitive key={`square-${idx}`} object={square} />
+        ))}
+        {rings.map((ring, idx) => (
+          <primitive key={`ring-${idx}`} object={ring} />
+        ))}
+      </group>
+    </>
   );
 }
