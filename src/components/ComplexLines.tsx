@@ -1,14 +1,28 @@
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
+import GradientMaterial from "./GradientMaterial";
 
 export default function ComplexLines() {
   const groupRef = useRef<THREE.Group>(null);
+  const scrollRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      scrollRef.current = window.scrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
 
-    if (groupRef.current) groupRef.current.rotation.z = t * 0.25;
+    if (groupRef.current) {
+      const scrollAmount = scrollRef.current * 0.001; // ปรับ sensitivity ได้
+      groupRef.current.rotation.z = t * 0.05 + scrollAmount;
+    }
 
     // 🌀 วงกลมไหว
     rings.forEach((ring, i) => {
@@ -46,7 +60,7 @@ export default function ComplexLines() {
   const squares: THREE.Line[] = [];
   const squareCount = 50; // 👈 เพิ่มจำนวนให้ซ้อนจนถึงขอบ
   const startSize = 1.2; // ⬅️ เริ่มจากเล็กตรงกลาง
-  const endSize = 10; // ⬅️ ไปจนถึงขอบจอ (ขึ้นกับ canvas)
+  const endSize = 16; // ⬅️ ไปจนถึงขอบจอ (ขึ้นกับ canvas)
 
   for (let i = 0; i < squareCount; i++) {
     const t = i / (squareCount - 1);
@@ -115,7 +129,7 @@ export default function ComplexLines() {
 
   return (
     <group ref={groupRef}>
-      <mesh position={[0, 0, -0.01]}>
+      <mesh position={[0, 0, -0.01]} scale={[0.9, 0.9, 0.9]}>
         <circleGeometry args={[1.3, 64]} />
         <meshBasicMaterial color="black" />
       </mesh>
