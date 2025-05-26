@@ -109,6 +109,8 @@ export default function FloatingBubbles({ isLoaded }: { isLoaded: boolean }) {
         emissiveIntensity={0.7}
         roughness={0.2}
         metalness={0.3}
+        opacity={0.25}
+        transparent={true}
       />
     </instancedMesh>
   );
