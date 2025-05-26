@@ -13,6 +13,8 @@ import "./GlitchMaterial";
 import GlitchLogo from "./GlitchLogo";
 import WormholeCameraZoom from "./WormholeCameraZoom";
 import FloatingBubbles from "./FloatingBubbles";
+import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
+import Link from "next/link";
 
 function CanvasBG({ isLoaded }: { isLoaded: boolean }) {
   return (
@@ -44,6 +46,8 @@ export default function Hero() {
   const subRef = useRef(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const topNavRef = useRef(null);
+  const bottomNavRef = useRef(null);
 
   // simulate loading 0-100%
   useEffect(() => {
@@ -65,7 +69,10 @@ export default function Hero() {
     if (!isLoaded) return;
 
     const ctx = gsap.context(() => {
-      gsap.fromTo(
+      const tl = gsap.timeline();
+
+      // 🔵 Logo
+      tl.fromTo(
         logoRef.current,
         { opacity: 0, y: 60, scale: 1.1 },
         {
@@ -77,16 +84,30 @@ export default function Hero() {
         }
       );
 
-      gsap.fromTo(
+      // 🔵 Tagline
+      tl.fromTo(
         subRef.current,
         { opacity: 0, y: 20 },
         {
           opacity: 0.7,
           y: 0,
           duration: 1.8,
-          delay: 1.2,
           ease: "power2.out",
-        }
+        },
+        ">0.2"
+      );
+
+      // 🟣 Top + Bottom nav แสดงพร้อมกันหลัง tagline
+      tl.from(
+        [topNavRef.current, bottomNavRef.current],
+        {
+          y: 20,
+          opacity: 0,
+          duration: 1,
+          ease: "power3.out",
+          stagger: 0, // 🔁 ไม่มี delay ระหว่างสองตัวนี้
+        },
+        ">0.3" // ⏳ เริ่มหลัง tagline 0.3s
       );
     }, containerRef);
 
@@ -117,8 +138,73 @@ export default function Hero() {
           </div>
         </div>
       )}
+      {isLoaded && (
+        <>
+          <div
+            ref={topNavRef}
+            className="absolute top-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2 text-sm font-mono text-white"
+          >
+            <Link
+              href="#showcase"
+              className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
+            >
+              Showcase
+            </Link>
+            <p>/</p>
+            <Link
+              href="#services"
+              className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
+            >
+              Services
+            </Link>
+          </div>
 
-      {/* 🔥 Logo + tagline after load */}
+          <div
+            ref={bottomNavRef}
+            className="absolute bottom-6 left-5 z-30 flex space-x-6 text-white text-xl"
+          >
+            <Link
+              href="https://facebook.com/..."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaFacebookF className="hover:text-blue-400 transition" />
+            </Link>
+            <Link
+              href="https://linkedin.com/..."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaLinkedinIn className="hover:text-blue-400 transition" />
+            </Link>
+            <Link
+              href="https://dev.to/..."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaDev className="hover:text-gray-300 transition" />
+            </Link>
+            <Link
+              href="https://x.com/..."
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FaXTwitter className="hover:text-white transition" />
+            </Link>
+            <Link
+              href="#about"
+              className="text-sm font-mono hover:text-cyan-300 transition"
+            >
+              AboutUs
+            </Link>
+            <div className="flex items-center justify-center">
+              <p className="text-white text-center text-xs font-mono opacity-60">
+                © {new Date().getFullYear()} Worapon Jintajirakul · Code404
+              </p>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
