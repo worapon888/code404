@@ -20,17 +20,28 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
   useEffect(() => {
     if (!isLoaded || !meshRef.current) return;
 
-    gsap.fromTo(
-      meshRef.current.material,
-      { opacity: 0 },
-      {
-        opacity: 1,
-        duration: 1.5,
-        delay: 2.2, // หลังฟองรวมตัว
-        ease: "power2.out",
-      }
-    );
+    if (meshRef.current.material instanceof THREE.ShaderMaterial) {
+      meshRef.current.material.transparent = true;
+      meshRef.current.material.opacity = 0;
+    }
 
+    // ✅ โลโก้ค่อย ๆ ลอยขึ้นอย่างนุ่ม
+    gsap.to(meshRef.current.position, {
+      y: 0.15,
+      duration: 2.8,
+      delay: 1.0, // เพิ่ม breathing room ก่อนเริ่ม
+      ease: "sine.out", // ลื่น ไม่กระชาก
+    });
+
+    // ✅ โลโก้ fade-in แบบลื่น
+    gsap.to(meshRef.current.material, {
+      opacity: 1,
+      duration: 2.8,
+      delay: 1.0,
+      ease: "sine.out",
+    });
+
+    // ✅ ข้อความขึ้นตามอย่างนุ่ม
     gsap.fromTo(
       textRef.current,
       { opacity: 0, y: 20, scale: 1.05 },
@@ -38,20 +49,11 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 1.8,
-        ease: "power3.out",
-        delay: 0.3,
+        duration: 2.4,
+        delay: 3.0, // รอโลโก้จบก่อนค่อยขึ้นข้อความ
+        ease: "power2.out",
       }
     );
-
-    gsap.to(textRef.current, {
-      x: "+=1",
-      duration: 0.05,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-      delay: 2.2,
-    });
   }, [isLoaded]);
 
   const scaleFactor = 0.7;
@@ -61,7 +63,7 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
       {/* ✅ โลโก้ Glitch มี shader */}
       <mesh
         ref={meshRef}
-        position={[0, 0.15, 0]}
+        position={[0, -0.3, 0]} // ⬅️ เริ่มต่ำลง
         scale={[0.35 * scaleFactor, 0.15 * scaleFactor, 1]}
       >
         <planeGeometry args={[6, 4]} />

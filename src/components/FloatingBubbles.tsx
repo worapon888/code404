@@ -4,13 +4,21 @@ import { InstancedMesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import gsap from "gsap";
-
+import { useThree } from "@react-three/fiber";
 const COUNT = 250;
 
 export default function FloatingBubbles({ isLoaded }: { isLoaded: boolean }) {
   const meshRef = useRef<InstancedMesh>(null);
   const dummy = new THREE.Object3D();
+  const velocities = useRef<THREE.Vector3[]>(
+    Array.from({ length: COUNT }, () => new THREE.Vector3())
+  );
+  const basePositions = useRef<THREE.Vector3[]>([]);
+
   const initialPositions = useRef<THREE.Vector3[]>([]);
+  const { mouse, camera } = useThree();
+
+  const raycaster = useRef(new THREE.Raycaster());
 
   // สร้างตำแหน่งฟองแบบกระจาย
   useEffect(() => {
@@ -19,9 +27,11 @@ export default function FloatingBubbles({ isLoaded }: { isLoaded: boolean }) {
       const x = (Math.random() - 0.5) * 12;
       const y = (Math.random() - 0.5) * 12;
       const z = (Math.random() - 0.5) * 6;
-      positions.push(new THREE.Vector3(x, y, z));
+      const pos = new THREE.Vector3(x, y, z);
+      positions.push(pos);
     }
-    initialPositions.current = positions;
+    initialPositions.current = positions.map((p) => p.clone()); // ตัวใช้งานจริง
+    basePositions.current = positions; // สำรองไว้
   }, []);
 
   // Animate: รวมตัวเข้าโลโก้เมื่อโหลดเสร็จ
@@ -52,8 +62,32 @@ export default function FloatingBubbles({ isLoaded }: { isLoaded: boolean }) {
   // ฟองลอยขึ้นลงเบา ๆ
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
+
+    // ใช้ raycaster แปลงตำแหน่งเมาส์
+    raycaster.current.setFromCamera(mouse, camera);
+    const mousePos = new THREE.Vector3();
+    raycaster.current.ray.at(6, mousePos); // เลือกระยะประมาณ 6 หน่วย (ใกล้ขอบเขตฟอง)
+
     for (let i = 0; i < COUNT; i++) {
-      const base = initialPositions.current[i] || new THREE.Vector3();
+      const base = initialPositions.current[i];
+      if (!base) continue;
+
+      const velocity = velocities.current[i];
+
+      // คำนวณระยะทางระหว่างฟองกับตำแหน่งเมาส์ในโลก
+      const distance = base.distanceTo(mousePos);
+
+      if (distance < 1.2) {
+        const forceDir = base.clone().sub(mousePos).normalize();
+        const strength = (1.2 - distance) * 0.12;
+        velocity.add(forceDir.multiplyScalar(strength));
+      }
+
+      // อัปเดตตำแหน่งด้วย velocity และลดแรงด้วย damping
+      base.add(velocity);
+      velocity.multiplyScalar(0.92);
+
+      // เพิ่ม motion ลอยขึ้นลงเบา ๆ
       dummy.position.set(
         base.x,
         base.y + Math.sin(clock.elapsedTime * 2 + i) * 0.1,
@@ -62,6 +96,7 @@ export default function FloatingBubbles({ isLoaded }: { isLoaded: boolean }) {
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
     }
+
     meshRef.current.instanceMatrix.needsUpdate = true;
   });
 

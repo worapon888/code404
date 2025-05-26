@@ -8,6 +8,8 @@ const GlitchMaterial = shaderMaterial(
     uTime: 0,
     uIntensity: 1,
     uTexture: new THREE.Texture(),
+    opacity: 1.0,
+    transparent: true,
   },
   // ✅ Vertex Shader
   `
@@ -67,6 +69,7 @@ const GlitchMaterial = shaderMaterial(
 );
 
 // ✅ ให้ R3F รู้จัก <glitchMaterial />
+
 extend({ GlitchMaterial });
 
 declare module "@react-three/fiber" {

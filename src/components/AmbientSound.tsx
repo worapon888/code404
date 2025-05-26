@@ -8,7 +8,7 @@ export default function EnableSoundButton() {
 
   useEffect(() => {
     if (enabled && audioRef.current) {
-      audioRef.current.volume = 0.1;
+      audioRef.current.volume = 0.5;
       audioRef.current.loop = true;
       audioRef.current
         .play()
@@ -28,7 +28,7 @@ export default function EnableSoundButton() {
         )}
       >
         <div className="flex items-center space-x-2">
-          {enabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          {enabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
           <div className="flex space-x-[2px] h-4 items-end">
             {[1, 2, 3].map((i) => (
               <span

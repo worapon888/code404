@@ -16,7 +16,7 @@ export default function WormholeCameraZoom({
     // ✅ กล้องซูมเข้าอย่างนุ่มนวล
     gsap.fromTo(
       camera.position,
-      { z: 20 }, // เริ่มไกลออกไป
+      { z: 30 }, // เริ่มไกลออกไป
       {
         z: 6, // ซูมเข้ามาใกล้โลโก้
         duration: 2.4,

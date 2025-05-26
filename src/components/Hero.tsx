@@ -27,6 +27,7 @@ function CanvasBG({ isLoaded }: { isLoaded: boolean }) {
         <FloatingParticlesGroup layer={1} />
         <ComplexLines />
         <FloatingBubbles isLoaded={isLoaded} />
+
         <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
         <EffectComposer>
