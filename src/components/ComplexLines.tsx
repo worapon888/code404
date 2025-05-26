@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import GradientMaterial from "./GradientMaterial";
 
 export default function ComplexLines() {
   const groupRef = useRef<THREE.Group>(null);
@@ -27,19 +26,19 @@ export default function ComplexLines() {
     // 🌀 วงกลมไหว
     rings.forEach((ring, i) => {
       const material = ring.material as THREE.LineBasicMaterial;
-      material.opacity = 0.005 + Math.sin(t * 1.5 + i) * 0.01;
+      material.opacity = 0.001 + Math.sin(t * 1.5 + i) * 0.01;
     });
 
     // 🔲 สี่เหลี่ยมพริ้ว
     squares.forEach((square, i) => {
       const material = square.material as THREE.LineBasicMaterial;
-      material.opacity = 0.005 + Math.sin(t * 2 + i) * 0.02;
+      material.opacity = 0.001 + Math.sin(t * 2 + i) * 0.02;
     });
 
     // ⬡ Polygon พริ้วบาง ๆ
     polygons.forEach((polygon, i) => {
       const material = polygon.material as THREE.LineBasicMaterial;
-      material.opacity = 0.005 + Math.sin(t * 1.8 + i) * 0.01;
+      material.opacity = 0.001 + Math.sin(t * 1.8 + i) * 0.01;
     });
   });
 
