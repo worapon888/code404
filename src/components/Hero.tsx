@@ -5,16 +5,24 @@ import { gsap } from "gsap";
 import Image from "next/image";
 import { Canvas } from "@react-three/fiber";
 import ComplexLines from "./ComplexLines";
+import { Suspense } from "react";
+import { EffectComposer, Bloom } from "@react-three/postprocessing";
 
+// ✅ Canvas background with Bloom & Suspense
 function CanvasBG() {
   return (
     <Canvas
-      camera={{ position: [0, 0, 5], fov: 50 }}
+      camera={{ position: [0, 0, 8], fov: 50 }}
       gl={{ antialias: true }}
       className="absolute inset-0 z-0"
     >
       <ambientLight intensity={1} />
-      <ComplexLines />
+      <Suspense fallback={null}>
+        <ComplexLines />
+        <EffectComposer>
+          <Bloom intensity={1.4} luminanceThreshold={0.1} />
+        </EffectComposer>
+      </Suspense>
     </Canvas>
   );
 }
@@ -30,7 +38,7 @@ export default function Hero() {
         logoRef.current,
         { opacity: 0, y: 60, scale: 1.1 },
         {
-          opacity: 1,
+          opacity: 1, // ✅ ชัดเจนขึ้น
           y: 0,
           scale: 1,
           duration: 2.2,
@@ -42,16 +50,16 @@ export default function Hero() {
         subRef.current,
         { opacity: 0, y: 20 },
         {
-          opacity: 1,
+          opacity: 0.7, // ✅ ยังเบาอยู่แต่ไม่จางเกินไป
           y: 0,
           duration: 1.8,
           delay: 1.2,
           ease: "power2.out",
         }
       );
-    }, containerRef);
+    }, containerRef); // ✅ สร้าง context ให้ชัดเจน
 
-    return () => ctx.revert();
+    return () => ctx.revert(); // ✅ Cleanup animations
   }, []);
 
   return (
@@ -61,8 +69,8 @@ export default function Hero() {
     >
       <CanvasBG />
 
-      {/* Centered content */}
-      <div className="absolute z-10 text-center space-y-4 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+      {/* Centered Text Content */}
+      <div className="absolute z-10 text-center space-y-5 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div ref={logoRef} className="inline-block">
           <Image
             src="/logo_code404.png"
@@ -73,13 +81,13 @@ export default function Hero() {
             priority
           />
         </div>
+
         <p
           ref={subRef}
-          className="text-sm md:text-base font-mono text-white/60 tracking-wide mb-6 backdrop-blur-sm mix-blend-screen"
+          className="text-sm md:text-base font-mono text-white/70 tracking-wide backdrop-blur-sm mix-blend-screen"
         >
           Creating software that feels.
         </p>
-        <div className="p-2 bg-gray-100"></div>
       </div>
     </section>
   );

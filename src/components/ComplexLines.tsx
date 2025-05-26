@@ -4,16 +4,33 @@ import { useRef } from "react";
 
 export default function ComplexLines() {
   const groupRef = useRef<THREE.Group>(null);
-  const beamRef = useRef<THREE.Mesh>(null);
 
   useFrame(({ clock }) => {
     const t = clock.getElapsedTime();
-    if (groupRef.current) groupRef.current.rotation.z = t * 0.2;
-    if (beamRef.current) beamRef.current.position.x = Math.sin(t * 2) * 1.4;
+
+    if (groupRef.current) groupRef.current.rotation.z = t * 0.25;
+
+    // 🌀 วงกลมไหว
+    rings.forEach((ring, i) => {
+      const material = ring.material as THREE.LineBasicMaterial;
+      material.opacity = 0.005 + Math.sin(t * 1.5 + i) * 0.01;
+    });
+
+    // 🔲 สี่เหลี่ยมพริ้ว
+    squares.forEach((square, i) => {
+      const material = square.material as THREE.LineBasicMaterial;
+      material.opacity = 0.005 + Math.sin(t * 2 + i) * 0.02;
+    });
+
+    // ⬡ Polygon พริ้วบาง ๆ
+    polygons.forEach((polygon, i) => {
+      const material = polygon.material as THREE.LineBasicMaterial;
+      material.opacity = 0.005 + Math.sin(t * 1.8 + i) * 0.01;
+    });
   });
 
   // 🔘 วงกลมซ้อน (ใหญ่ขึ้น)
-  const rings = [];
+  const rings: THREE.Line[] = [];
   for (let i = 0; i < 10; i++) {
     const radius = 2 + i * 0.25; // เพิ่มขนาดเริ่มต้น + ความห่างแต่ละวง
     const geometry = new THREE.RingGeometry(radius, radius + 0.01, 64);
@@ -26,7 +43,7 @@ export default function ComplexLines() {
     rings.push(ring);
   }
 
-  const squares = [];
+  const squares: THREE.Line[] = [];
   const squareCount = 50; // 👈 เพิ่มจำนวนให้ซ้อนจนถึงขอบ
   const startSize = 1.2; // ⬅️ เริ่มจากเล็กตรงกลาง
   const endSize = 10; // ⬅️ ไปจนถึงขอบจอ (ขึ้นกับ canvas)
@@ -47,7 +64,7 @@ export default function ComplexLines() {
     const material = new THREE.LineBasicMaterial({
       color: "#ffffff",
       transparent: true,
-      opacity: 0.07 + (1 - t) * 0.03, // ชั้นในเข้ม ชั้นนอกจาง
+      opacity: 0.005 + (1 - t) * 0.03, // ชั้นในเข้ม ชั้นนอกจาง
     });
 
     const square = new THREE.Line(geometry, material);
@@ -67,14 +84,14 @@ export default function ComplexLines() {
     const material = new THREE.LineBasicMaterial({
       color: "#ffffff",
       transparent: true,
-      opacity: 0.015,
+      opacity: 0.005,
     });
     const line = new THREE.Line(geometry, material);
     diagonals.push(line);
   }
 
   // ✴️ Polygon หลายเหลี่ยมกลางวง
-  const polygons = [];
+  const polygons: THREE.Line[] = [];
   for (let i = 0; i < 6; i++) {
     const sides = 12;
     const radius = 1.6 + i * 0.1;
@@ -89,7 +106,7 @@ export default function ComplexLines() {
     const material = new THREE.LineBasicMaterial({
       color: "#ffffff",
       transparent: true,
-      opacity: 0.015,
+      opacity: 0.01,
     });
     const polygon = new THREE.Line(geometry, material);
     polygon.rotation.z = (i * Math.PI) / 12;
@@ -98,6 +115,10 @@ export default function ComplexLines() {
 
   return (
     <group ref={groupRef}>
+      <mesh position={[0, 0, -0.01]}>
+        <circleGeometry args={[1.3, 64]} />
+        <meshBasicMaterial color="black" />
+      </mesh>
       {diagonals.map((line, idx) => (
         <primitive key={`diag-${idx}`} object={line} />
       ))}
