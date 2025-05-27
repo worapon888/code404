@@ -15,8 +15,17 @@ import WormholeCameraZoom from "./WormholeCameraZoom";
 import FloatingBubbles from "./FloatingBubbles";
 import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
+import AboutSectionInsideCanvas from "./AboutSectionInsideCanvas";
 
-function CanvasBG({ isLoaded }: { isLoaded: boolean }) {
+function CanvasBG({
+  isLoaded,
+  showAbout,
+  startAboutMotion,
+}: {
+  isLoaded: boolean;
+  showAbout: boolean;
+  startAboutMotion: boolean;
+}) {
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 50, near: 0.1 }}
@@ -29,7 +38,7 @@ function CanvasBG({ isLoaded }: { isLoaded: boolean }) {
         <FloatingParticlesGroup layer={1} />
         <ComplexLines />
         <FloatingBubbles isLoaded={isLoaded} />
-
+        {startAboutMotion && <AboutSectionInsideCanvas show={showAbout} />}
         <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
         <EffectComposer>
@@ -48,7 +57,14 @@ export default function Hero() {
   const [isLoaded, setIsLoaded] = useState(false);
   const topNavRef = useRef(null);
   const bottomNavRef = useRef(null);
+  const contactRef = useRef(null);
+  const [showAbout, setShowAbout] = useState(false);
+  const [startAboutMotion, setStartAboutMotion] = useState(false);
 
+  const handleGoToAbout = () => {
+    setStartAboutMotion(true);
+    setTimeout(() => setShowAbout(true), 800); // กล้องซูมก่อน แล้วค่อยโชว์ข้อความ
+  };
   // simulate loading 0-100%
   useEffect(() => {
     let progress = 0;
@@ -99,7 +115,7 @@ export default function Hero() {
 
       // 🟣 Top + Bottom nav แสดงพร้อมกันหลัง tagline
       tl.from(
-        [topNavRef.current, bottomNavRef.current],
+        [topNavRef.current, bottomNavRef.current, contactRef.current],
         {
           y: 20,
           opacity: 0,
@@ -121,7 +137,11 @@ export default function Hero() {
     >
       <EnableSoundButton />
       <ParallaxTiltEffect>
-        <CanvasBG isLoaded={isLoaded} />
+        <CanvasBG
+          isLoaded={isLoaded}
+          showAbout={showAbout}
+          startAboutMotion={startAboutMotion}
+        />
       </ParallaxTiltEffect>
 
       {/* 🔵 Loading screen */}
@@ -145,17 +165,36 @@ export default function Hero() {
             className="absolute top-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2 text-sm font-mono text-white"
           >
             <Link
-              href="#showcase"
+              href="showcase"
               className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
             >
               Showcase
             </Link>
             <p>/</p>
             <Link
-              href="#services"
+              href="services"
               className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
             >
               Services
+            </Link>
+            <p>/</p>
+            <Link
+              href="about"
+              onClick={(e) => {
+                e.preventDefault();
+                handleGoToAbout();
+              }}
+              className="text-sm font-mono hover:text-cyan-300 transition"
+            >
+              AboutUs
+            </Link>
+          </div>
+          <div ref={contactRef} className="absolute top-6 right-6 z-30">
+            <Link
+              href="#contact"
+              className="px-4 py-1.5 text-sm font-mono border border-white/30 rounded-lg text-white hover:bg-white/10 transition backdrop-blur-sm"
+            >
+              Contact Us
             </Link>
           </div>
 
@@ -191,12 +230,7 @@ export default function Hero() {
             >
               <FaXTwitter className="hover:text-white transition" />
             </Link>
-            <Link
-              href="#about"
-              className="text-sm font-mono hover:text-cyan-300 transition"
-            >
-              AboutUs
-            </Link>
+
             <div className="flex items-center justify-center">
               <p className="text-white text-center text-xs font-mono opacity-60">
                 © {new Date().getFullYear()} Worapon Jintajirakul · Code404
