@@ -2,7 +2,10 @@
 import { useMemo } from "react";
 import { Points, PointMaterial } from "@react-three/drei";
 
-export function FloatingParticlesGroup({ count = 200, layer = 1 }) {
+
+
+export function FloatingParticlesGroup({ count = 400, layer = 1 }) {
+
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {

@@ -17,6 +17,8 @@ import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
 import AboutSectionInsideCanvas from "./AboutSectionInsideCanvas";
 
+import LightSpeedParticles from "./LightSpeedParticles";
+
 function CanvasBG({
   isLoaded,
   showAbout,
@@ -26,6 +28,8 @@ function CanvasBG({
   showAbout: boolean;
   startAboutMotion: boolean;
 }) {
+  const [showWarpEffect, setShowWarpEffect] = useState(false);
+
   return (
     <Canvas
       camera={{ position: [0, 0, 6], fov: 50, near: 0.1 }}
@@ -38,7 +42,14 @@ function CanvasBG({
         <FloatingParticlesGroup layer={1} />
         <ComplexLines />
         <FloatingBubbles isLoaded={isLoaded} />
-        {startAboutMotion && <AboutSectionInsideCanvas show={showAbout} />}
+        {startAboutMotion && <AboutSectionInsideCanvas show={showAbout} setShowWarpEffect={setShowWarpEffect}/>}
+        {showWarpEffect && <LightSpeedParticles active />}
+        {startAboutMotion && (
+          <AboutSectionInsideCanvas
+            show={showAbout}
+            setShowWarpEffect={setShowWarpEffect}
+          />
+        )}
         <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
         <EffectComposer>
