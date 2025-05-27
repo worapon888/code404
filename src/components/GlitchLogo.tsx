@@ -9,6 +9,7 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const texture = useLoader(THREE.TextureLoader, "/code404logo.png");
+  const hasAnimated = useRef(false);
 
   // ดึง viewport info เพื่อทำ responsive
   const { viewport } = useThree();
@@ -27,7 +28,8 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
   });
 
   useEffect(() => {
-    if (!isLoaded || !meshRef.current) return;
+    if (!isLoaded || !meshRef.current || hasAnimated.current) return;
+    hasAnimated.current = true;
 
     if (meshRef.current.material instanceof THREE.ShaderMaterial) {
       meshRef.current.material.transparent = true;

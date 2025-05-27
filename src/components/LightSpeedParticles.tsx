@@ -15,7 +15,7 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
   const particles = useRef<Particle[]>([]);
 
   const geometry = useMemo(() => {
-    const geo = new THREE.CylinderGeometry(0.01, 0.01, 50, 7);
+    const geo = new THREE.CylinderGeometry(0.01, 0.01, 40, 7);
     geo.rotateX(Math.PI / 2); // หันให้ยืดตามแนว Z
     return geo;
   }, []);

@@ -16,15 +16,84 @@ const paragraphs = [
 
 export default function AboutSectionInsideCanvas({
   show,
+
   setShowWarpEffect,
+  onClose,
 }: {
   show: boolean;
+
   setShowWarpEffect: (v: boolean) => void;
+  onClose: () => void;
 }) {
   const { camera, gl } = useThree();
   const htmlRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<THREE.Group>(null);
   const charRefs = useRef<Array<Array<HTMLSpanElement | null>>>([]);
+  const [isExiting, setIsExiting] = useState(false);
+  const [, setReadyToSpawn] = useState(false);
+
+  const handleExit = () => {
+    if (isExiting) return;
+    setIsExiting(true);
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        onClose(); // ✅ ใช้ onClose แทน setShow(false)
+        setIsExiting(false);
+      },
+    });
+
+    // 1. Animate ตัวอักษรหายออกแบบ reverse
+    tl.add(() => {
+      charRefs.current.forEach((line, i) => {
+        line.forEach((charEl, j) => {
+          gsap.to(charEl, {
+            opacity: 0,
+            y: 20,
+            duration: 0.4,
+            ease: "power2.inOut",
+            delay: i * 0.1 + j * 0.005,
+          });
+        });
+      });
+    }, 0); // เริ่มทันที
+
+    // 2. Fade out กล่องหลังตัวอักษรเริ่มหาย
+    tl.to(
+      htmlRef.current,
+      {
+        opacity: 0,
+        duration: 0.4,
+        ease: "power2.inOut",
+      },
+      ">+0.4" // ✅ รอประมาณ 0.4s
+    );
+
+    // 4. กล้องถอยจาก (2, 0.6, 1.5) → (0, 0, 4.5)
+    tl.to(
+      camera.position,
+      {
+        x: 0,
+        y: 0,
+        z: 4.5,
+        duration: 2,
+        ease: "power3.inOut",
+      },
+      ">+0.2"
+    );
+
+    // 5. กล้องหมุนกลับ: (-0.15, -0.9) → (0, 0)
+    tl.to(
+      camera.rotation,
+      {
+        x: 0,
+        y: 0,
+        duration: 1.6,
+        ease: "sine.inOut",
+      },
+      "<"
+    );
+  };
 
   // Sync กล้องกับ group ของข้อความ
   useFrame(() => {
@@ -32,8 +101,6 @@ export default function AboutSectionInsideCanvas({
       groupRef.current.quaternion.copy(camera.quaternion);
     }
   });
-  const [, setReadyToSpawn] = useState(false);
-
 
   useEffect(() => {
     if (!show) return;
@@ -126,7 +193,7 @@ export default function AboutSectionInsideCanvas({
       <Html transform>
         <div
           ref={htmlRef}
-          className="flex flex-col items-center justify-center h-screen text-white font-mono backdrop-blur-md bg-black/40 rounded-xl shadow-xl px-8 py-12 "
+          className="relative flex flex-col items-center justify-center h-screen text-white font-mono backdrop-blur-md bg-black/40 rounded-xl shadow-xl px-8 py-12"
           style={{
             opacity: 0,
             pointerEvents: "auto",
@@ -136,6 +203,14 @@ export default function AboutSectionInsideCanvas({
             transform: "scale(0.68)",
           }}
         >
+          {/* 🔙 ปุ่มย้อนกลับ */}
+          <button
+            onClick={handleExit}
+            className="cursor-pointer absolute top-4 left-4 px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-sm text-white shadow transition"
+          >
+            ← Back
+          </button>
+
           <div className="max-w-xl w-full text-center text-white space-y-5">
             <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-cyan-300 drop-shadow-lg mb-6">
               About Us
@@ -166,4 +241,3 @@ export default function AboutSectionInsideCanvas({
     </group>
   );
 }
-

@@ -23,10 +23,12 @@ function CanvasBG({
   isLoaded,
   showAbout,
   startAboutMotion,
+  setShowAbout,
 }: {
   isLoaded: boolean;
   showAbout: boolean;
   startAboutMotion: boolean;
+  setShowAbout: (v: boolean) => void;
 }) {
   const [showWarpEffect, setShowWarpEffect] = useState(false);
 
@@ -42,16 +44,20 @@ function CanvasBG({
         <FloatingParticlesGroup layer={1} />
         <ComplexLines />
         <FloatingBubbles isLoaded={isLoaded} />
-        {startAboutMotion && <AboutSectionInsideCanvas show={showAbout} setShowWarpEffect={setShowWarpEffect}/>}
-        {showWarpEffect && <LightSpeedParticles active />}
+
+        {/* ✅ เรียกตัวเดียวเท่านั้น */}
         {startAboutMotion && (
           <AboutSectionInsideCanvas
             show={showAbout}
+            onClose={() => setShowAbout(false)} // ✅
             setShowWarpEffect={setShowWarpEffect}
           />
         )}
+
+        {showWarpEffect && <LightSpeedParticles active />}
         <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
+
         <EffectComposer>
           <Bloom intensity={1.4} luminanceThreshold={0.1} />
         </EffectComposer>
@@ -152,6 +158,7 @@ export default function Hero() {
           isLoaded={isLoaded}
           showAbout={showAbout}
           startAboutMotion={startAboutMotion}
+          setShowAbout={setShowAbout}
         />
       </ParallaxTiltEffect>
 
@@ -195,7 +202,7 @@ export default function Hero() {
                 e.preventDefault();
                 handleGoToAbout();
               }}
-              className="text-sm font-mono hover:text-cyan-300 transition"
+              className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
             >
               AboutUs
             </Link>
