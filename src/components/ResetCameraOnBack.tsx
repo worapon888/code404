@@ -1,6 +1,7 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import gsap from "gsap";
+import { PerspectiveCamera } from "three";
 
 export default function ResetCameraOnBack({ trigger }: { trigger: boolean }) {
   const { camera } = useThree();
@@ -8,12 +9,11 @@ export default function ResetCameraOnBack({ trigger }: { trigger: boolean }) {
   useEffect(() => {
     if (!trigger) return;
 
-    // ✅ รอ 1 tick เพื่อให้กล้องมั่นใจว่าไม่เป็น null
     const timeout = setTimeout(() => {
       if (!camera) return;
 
       const tl = gsap.timeline();
-      console.log(camera.position.z);
+
       tl.to(camera.position, {
         x: 0,
         y: 0,
@@ -34,8 +34,10 @@ export default function ResetCameraOnBack({ trigger }: { trigger: boolean }) {
         "<"
       );
 
-      camera.fov = 50;
-      camera.updateProjectionMatrix();
+      // ✅ cast ให้เป็น PerspectiveCamera ก่อนใช้ .fov
+      const perspectiveCamera = camera as PerspectiveCamera;
+      perspectiveCamera.fov = 50;
+      perspectiveCamera.updateProjectionMatrix();
     }, 0);
 
     return () => clearTimeout(timeout);
