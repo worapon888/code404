@@ -7,26 +7,37 @@ import "./GlitchMaterial";
 
 export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const htmlGroupRef = useRef<THREE.Group>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const texture = useLoader(THREE.TextureLoader, "/code404logo.png");
   const hasAnimated = useRef(false);
-
-  // ดึง viewport info เพื่อทำ responsive
   const { viewport } = useThree();
 
-  // ปรับ scale และตำแหน่งตามขนาด viewport
-  const baseScale = 0.7;
-  const scaleFactor = baseScale * Math.min(viewport.width / 6, 1);
-  const yPosition = -0.3 + (viewport.height < 4 ? viewport.height * 0.05 : 0);
-  const finalY = yPosition + 0.5;
-
-  // update shader uniform เวลาเล่นแอนิเมชัน
+  // Shader time animate
   useFrame(({ clock }) => {
     if (meshRef.current?.material instanceof THREE.ShaderMaterial) {
       meshRef.current.material.uniforms.uTime.value = clock.getElapsedTime();
     }
   });
 
+  // Responsive scale/position
+  useFrame(() => {
+    const baseScale = 0.7;
+    const scaleFactor = baseScale * Math.min(viewport.width / 6, 1);
+    const yPosition = -0.3 + (viewport.height < 4 ? viewport.height * 0.05 : 0);
+    const finalY = yPosition + 0.5;
+
+    if (meshRef.current) {
+      meshRef.current.position.set(0, finalY, 0);
+      meshRef.current.scale.set(0.35 * scaleFactor, 0.15 * scaleFactor, 1);
+    }
+
+    if (htmlGroupRef.current) {
+      htmlGroupRef.current.position.set(0, yPosition + 0.1, 0);
+    }
+  });
+
+  // Animate in
   useEffect(() => {
     if (!isLoaded || !meshRef.current || hasAnimated.current) return;
     hasAnimated.current = true;
@@ -38,38 +49,48 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
 
     const tl = gsap.timeline();
 
-    // เริ่มต่ำกว่า แล้วลอยขึ้นถึงตำแหน่งที่สูงกว่าเดิม
+    const yPosition = -0.3 + (viewport.height < 4 ? viewport.height * 0.05 : 0);
+    const finalY = yPosition + 0.5;
+
     tl.fromTo(
       meshRef.current.position,
-      { y: yPosition - 0.6 },
+      { y: finalY - 0.6 },
       { y: finalY, duration: 2.8, ease: "sine.out" }
     );
 
-    // Fade-in พร้อมกับลอยขึ้น
     tl.to(
       meshRef.current.material,
       { opacity: 1, duration: 2.8, ease: "sine.out" },
-      0 // รันพร้อมกับตำแหน่ง
+      0
     );
 
-    // ข้อความขึ้นหลังโลโก้ลอยเสร็จ
     tl.fromTo(
       textRef.current,
       { opacity: 0, y: 20, scale: 1.05 },
       { opacity: 1, y: 0, scale: 1, duration: 2.4, ease: "power2.out" },
-      ">+0.3" // เริ่มหลังจากลอยโลโก้เสร็จ + delay 0.3 วินาที
+      ">+0.3"
     );
+  }, [isLoaded, viewport.height]);
 
-    // เพิ่มท่าค้างไว้ตำแหน่งนี้ได้เลย (ไม่ต้องทำอะไรเพิ่ม)
-  }, [isLoaded, yPosition]);
+  // Reset default on remount
+  useEffect(() => {
+    hasAnimated.current = false;
+
+    if (meshRef.current?.material instanceof THREE.ShaderMaterial) {
+      const mat = meshRef.current.material;
+      mat.opacity = 0;
+      mat.uniforms.uIntensity.value = 0.3;
+      mat.uniforms.uTime.value = 0;
+    }
+
+    if (textRef.current) {
+      gsap.set(textRef.current, { opacity: 0, y: 20, scale: 1.05 });
+    }
+  }, []);
 
   return (
     <group position={[0, 0, 0]}>
-      <mesh
-        ref={meshRef}
-        position={[0, yPosition + 0.5, 0]}
-        scale={[0.35 * scaleFactor, 0.15 * scaleFactor, 1]}
-      >
+      <mesh ref={meshRef}>
         <planeGeometry args={[6, 4]} />
         <glitchMaterial
           attach="material"
@@ -79,14 +100,16 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
         />
       </mesh>
 
-      <Html position={[0, yPosition + 0.1, 0]} center>
-        <p
-          ref={textRef}
-          className="text-sm md:text-base font-mono text-white/80 tracking-wide whitespace-nowrap inline-block backdrop-blur-sm mix-blend-screen text-center"
-        >
-          Building software that makes a difference.
-        </p>
-      </Html>
+      <group ref={htmlGroupRef}>
+        <Html center>
+          <p
+            ref={textRef}
+            className="text-sm md:text-base font-mono text-white/80 tracking-wide whitespace-nowrap inline-block backdrop-blur-sm mix-blend-screen text-center"
+          >
+            Building software that makes a difference.
+          </p>
+        </Html>
+      </group>
     </group>
   );
 }

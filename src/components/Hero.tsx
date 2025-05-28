@@ -16,8 +16,8 @@ import FloatingBubbles from "./FloatingBubbles";
 import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
 import Link from "next/link";
 import AboutSectionInsideCanvas from "./AboutSectionInsideCanvas";
-
 import LightSpeedParticles from "./LightSpeedParticles";
+import ResetCameraOnBack from "@/components/ResetCameraOnBack";
 
 function CanvasBG({
   isLoaded,
@@ -55,7 +55,9 @@ function CanvasBG({
         )}
 
         {showWarpEffect && <LightSpeedParticles active />}
-        <GlitchLogo isLoaded={isLoaded} />
+        {!showAbout && <ResetCameraOnBack trigger={!showAbout} />}
+        <GlitchLogo key={showAbout ? "about" : "home"} isLoaded={isLoaded} />
+
         <WormholeCameraZoom isLoaded={isLoaded} />
 
         <EffectComposer>

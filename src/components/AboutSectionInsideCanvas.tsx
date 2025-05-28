@@ -25,12 +25,13 @@ export default function AboutSectionInsideCanvas({
   setShowWarpEffect: (v: boolean) => void;
   onClose: () => void;
 }) {
-  const { camera, gl } = useThree();
+  const { camera } = useThree();
   const htmlRef = useRef<HTMLDivElement>(null);
   const groupRef = useRef<THREE.Group>(null);
   const charRefs = useRef<Array<Array<HTMLSpanElement | null>>>([]);
   const [isExiting, setIsExiting] = useState(false);
   const [, setReadyToSpawn] = useState(false);
+  const { gl } = useThree(); // ✅ ดึง canvas element จริง
 
   const handleExit = () => {
     if (isExiting) return;
@@ -75,9 +76,10 @@ export default function AboutSectionInsideCanvas({
       {
         x: 0,
         y: 0,
-        z: 4.5,
+        z: 6,
         duration: 2,
         ease: "power3.inOut",
+        onUpdate: () => camera.updateProjectionMatrix(),
       },
       ">+0.2"
     );
@@ -122,25 +124,64 @@ export default function AboutSectionInsideCanvas({
           ease: "sine.inOut",
         });
 
+        const originalPos = new THREE.Vector3(2, 0.4, 0.5);
+
+        // 👇 timeline สำหรับ shake เบา ๆ
+        const shakeIntensity = 0.01;
+        const shakeTl = gsap.timeline({ repeat: -1, yoyo: true, paused: true });
+
+        shakeTl.to(camera.position, {
+          x: `+=${shakeIntensity}`,
+          y: `-=${shakeIntensity}`,
+          z: `+=${shakeIntensity}`,
+          duration: 0.04,
+          ease: "sine.inOut",
+        });
+        shakeTl.to(camera.position, {
+          x: `-=${shakeIntensity}`,
+          y: `+=${shakeIntensity}`,
+          z: `-=${shakeIntensity}`,
+          duration: 0.04,
+          ease: "sine.inOut",
+        });
+
         tl.to(
           camera.position,
           {
-            x: 2,
-            y: 0.6,
-            z: 1.5,
+            x: originalPos.x,
+            y: originalPos.y,
+            z: originalPos.z,
             duration: 2,
             ease: "power3.inOut",
             onStart: () => {
-              // ✅ แจ้ง parent ให้แสดงเอฟเฟกต์
               setShowWarpEffect(true);
               setTimeout(() => setShowWarpEffect(false), 1500);
               setTimeout(() => setReadyToSpawn(true), 500);
+
+              // ✅ blur แบบนุ่ม ๆ
+              gsap.fromTo(
+                gl.domElement,
+                { filter: "blur(1px)" },
+                {
+                  filter: "blur(0px)",
+                  duration: 0.4,
+                  ease: "power2.out",
+                  delay: 0.2,
+                }
+              );
+
+              // ✅ เริ่ม shake และหยุดหลัง 600ms
+              shakeTl.play();
+              setTimeout(() => {
+                shakeTl.kill();
+                camera.position.copy(originalPos);
+              }, 500);
             },
           },
           ">"
         );
 
-        // Animate ตัวอักษร
+        // ✨ Animate ตัวอักษร
         tl.add(() => {
           gsap.to(htmlRef.current, {
             opacity: 1,
@@ -172,54 +213,48 @@ export default function AboutSectionInsideCanvas({
     return () => clearTimeout(timeout);
   }, [show, setShowWarpEffect]);
 
-  useEffect(() => {
-    const canvas = gl.domElement;
-    if (!canvas) return;
-    gsap.fromTo(
-      canvas.style,
-      { filter: "contrast(1) brightness(1)" },
-      {
-        filter: "contrast(2.8) brightness(1.5)",
-        duration: 0.15,
-        yoyo: true,
-        repeat: 3,
-        ease: "rough({ strength: 1, points: 20, randomize: true })",
-      }
-    );
-  }, []);
-
   return (
     <group ref={groupRef} position={[14, -1, -8]}>
       <Html transform>
         <div
           ref={htmlRef}
-          className="relative flex flex-col items-center justify-center h-screen text-white font-mono backdrop-blur-md bg-black/40 rounded-xl shadow-xl px-8 py-12"
+          className="
+    relative flex flex-col items-center justify-center 
+    min-h-screen text-white font-mono 
+    backdrop-blur-md bg-black/40 rounded-xl shadow-xl 
+    px-6 py-10 sm:px-8 sm:py-12 md:px-12 md:py-16 
+    w-[90vw] max-w-3xl mx-auto
+    scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-65
+  "
           style={{
             opacity: 0,
             pointerEvents: "auto",
             zIndex: 9999,
-            fontSize: "0.95rem",
-            lineHeight: "1.6rem",
-            transform: "scale(0.68)",
+            fontSize: "0.6rem", // ✅ ลดขนาดลงจาก 0.95
+            lineHeight: "1.5rem",
           }}
         >
           {/* 🔙 ปุ่มย้อนกลับ */}
           <button
             onClick={handleExit}
-            className="cursor-pointer absolute top-4 left-4 px-3 py-1 rounded bg-white/10 hover:bg-white/20 text-sm text-white shadow transition"
+            className="
+      cursor-pointer absolute top-4 left-4 
+      px-3 py-1 rounded bg-white/10 hover:bg-white/20 
+      text-sm text-white shadow transition
+    "
           >
             ← Back
           </button>
 
-          <div className="max-w-xl w-full text-center text-white space-y-5">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-cyan-300 drop-shadow-lg mb-6">
+          <div className="w-full text-center text-white space-y-5">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-wide text-cyan-300 drop-shadow-lg mb-6">
               About Us
             </h1>
 
             {paragraphs.map((para, i) => (
               <p
                 key={i}
-                className="text-sm md:text-base text-white/90 leading-relaxed tracking-wide hover:text-white transition duration-300"
+                className="text-sm sm:text-base md:text-lg text-white/90 leading-relaxed tracking-wide hover:text-white transition duration-300"
               >
                 {para.split("").map((char, j) => (
                   <span
