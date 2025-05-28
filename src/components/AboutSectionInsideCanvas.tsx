@@ -226,13 +226,13 @@ export default function AboutSectionInsideCanvas({
     backdrop-blur-md bg-black/40 rounded-xl shadow-xl 
     px-6 py-10 sm:px-8 sm:py-12 md:px-12 md:py-16 
     w-[90vw] max-w-3xl mx-auto
-    scale-[0.65] sm:scale-[0.75] md:scale-[0.85] lg:scale-65
+    scale-[0.5] sm:scale-[0.3] md:scale-[0.6] lg:scale-65
   "
           style={{
             opacity: 0,
             pointerEvents: "auto",
             zIndex: 9999,
-            fontSize: "0.6rem", // ✅ ลดขนาดลงจาก 0.95
+            fontSize: "0.6rem",
             lineHeight: "1.5rem",
           }}
         >
@@ -240,7 +240,7 @@ export default function AboutSectionInsideCanvas({
           <button
             onClick={handleExit}
             className="
-    cursor-pointer absolute left-[5rem] top-[4.5rem]
+    cursor-pointer absolute left-1/8 top-1/8
     px-3 py-1 rounded bg-white/10 hover:bg-white/20
     text-sm text-white shadow transition z-20
   "
