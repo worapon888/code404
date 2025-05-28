@@ -6,12 +6,21 @@ import gsap from "gsap";
 import "./GlitchMaterial";
 
 export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
+  const groupRef = useRef<THREE.Group>(null);
   const meshRef = useRef<THREE.Mesh>(null);
   const htmlGroupRef = useRef<THREE.Group>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const texture = useLoader(THREE.TextureLoader, "/code404logo.png");
   const hasAnimated = useRef(false);
   const { viewport } = useThree();
+
+  const baseScale = 0.7;
+  const scaleFactor = baseScale * Math.min(viewport.width / 6, 1);
+  const defaultScale = new THREE.Vector3(
+    0.35 * scaleFactor,
+    0.15 * scaleFactor,
+    1
+  );
 
   // Shader time animate
   useFrame(({ clock }) => {
@@ -20,24 +29,7 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
     }
   });
 
-  // Responsive scale/position
-  useFrame(() => {
-    const baseScale = 0.7;
-    const scaleFactor = baseScale * Math.min(viewport.width / 6, 1);
-    const yPosition = -0.3 + (viewport.height < 4 ? viewport.height * 0.05 : 0);
-    const finalY = yPosition + 0.5;
-
-    if (meshRef.current) {
-      meshRef.current.position.set(0, finalY, 0);
-      meshRef.current.scale.set(0.35 * scaleFactor, 0.15 * scaleFactor, 1);
-    }
-
-    if (htmlGroupRef.current) {
-      htmlGroupRef.current.position.set(0, yPosition + 0.1, 0);
-    }
-  });
-
-  // Animate in
+  // Animate in (เฉพาะรอบแรก)
   useEffect(() => {
     if (!isLoaded || !meshRef.current || hasAnimated.current) return;
     hasAnimated.current = true;
@@ -47,10 +39,17 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
       meshRef.current.material.opacity = 0;
     }
 
-    const tl = gsap.timeline();
-
     const yPosition = -0.3 + (viewport.height < 4 ? viewport.height * 0.05 : 0);
     const finalY = yPosition + 0.5;
+
+    meshRef.current.position.set(0, finalY, 0);
+    meshRef.current.scale.copy(defaultScale);
+
+    if (htmlGroupRef.current) {
+      htmlGroupRef.current.position.set(0, yPosition + 0.1, 0);
+    }
+
+    const tl = gsap.timeline();
 
     tl.fromTo(
       meshRef.current.position,
@@ -72,7 +71,7 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
     );
   }, [isLoaded, viewport.height]);
 
-  // Reset default on remount
+  // Reset on first mount
   useEffect(() => {
     hasAnimated.current = false;
 
@@ -86,10 +85,14 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
     if (textRef.current) {
       gsap.set(textRef.current, { opacity: 0, y: 20, scale: 1.05 });
     }
+
+    if (meshRef.current) {
+      meshRef.current.scale.copy(defaultScale);
+    }
   }, []);
 
   return (
-    <group position={[0, 0, 0]}>
+    <group ref={groupRef} position={[0, 0, 0]}>
       <mesh ref={meshRef}>
         <planeGeometry args={[6, 4]} />
         <glitchMaterial
@@ -97,6 +100,8 @@ export default function GlitchLogo({ isLoaded }: { isLoaded: boolean }) {
           uTime={0}
           uIntensity={0.3}
           uTexture={texture}
+          transparent
+          opacity={1}
         />
       </mesh>
 

@@ -15,7 +15,7 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
   const particles = useRef<Particle[]>([]);
 
   const geometry = useMemo(() => {
-    const geo = new THREE.CylinderGeometry(0.01, 0.01, 30, 6);
+    const geo = new THREE.CylinderGeometry(0.01, 0.01, 30, 4);
     geo.rotateX(Math.PI / 2); // หันให้ยืดตามแนว Z
     return geo;
   }, []);
@@ -56,7 +56,7 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
 
         particles.current.push({
           position: spawn,
-          speed: 0.3 + Math.random() * 0.5, // ✅ ช้าลง → อยู่ในเฟรมนานขึ้น
+          speed: 0.5 + Math.random() * 0.5, // ✅ ช้าลง → อยู่ในเฟรมนานขึ้น
         });
       }
     }

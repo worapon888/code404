@@ -218,6 +218,8 @@ export default function AboutSectionInsideCanvas({
       <Html transform>
         <div
           ref={htmlRef}
+          id="aboutus"
+          aria-label="About Us"
           className="
     relative flex flex-col items-center justify-center 
     min-h-screen text-white font-mono 
@@ -238,10 +240,10 @@ export default function AboutSectionInsideCanvas({
           <button
             onClick={handleExit}
             className="
-      cursor-pointer absolute top-4 left-4 
-      px-3 py-1 rounded bg-white/10 hover:bg-white/20 
-      text-sm text-white shadow transition
-    "
+    cursor-pointer absolute left-[5rem] top-[4.5rem]
+    px-3 py-1 rounded bg-white/10 hover:bg-white/20
+    text-sm text-white shadow transition z-20
+  "
           >
             ← Back
           </button>

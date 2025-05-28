@@ -56,8 +56,7 @@ function CanvasBG({
 
         {showWarpEffect && <LightSpeedParticles active />}
         {!showAbout && <ResetCameraOnBack trigger={!showAbout} />}
-        <GlitchLogo key={showAbout ? "about" : "home"} isLoaded={isLoaded} />
-
+        <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
 
         <EffectComposer>
@@ -199,7 +198,7 @@ export default function Hero() {
             </Link>
             <p>/</p>
             <Link
-              href="about"
+              href="#aboutus"
               onClick={(e) => {
                 e.preventDefault();
                 handleGoToAbout();
