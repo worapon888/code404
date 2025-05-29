@@ -4,6 +4,7 @@ import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
 type NavigationProps = {
   onGoToAbout: () => void;
   onGoToShowcase: () => void;
+  onGoToServices: () => void;
   topNavRef: React.RefObject<HTMLDivElement | null>;
   contactRef: React.RefObject<HTMLDivElement | null>;
   bottomNavRef: React.RefObject<HTMLDivElement | null>;
@@ -11,10 +12,11 @@ type NavigationProps = {
 
 export default function Navigation({
   onGoToAbout,
+  onGoToShowcase,
+  onGoToServices,
   topNavRef,
   contactRef,
   bottomNavRef,
-  onGoToShowcase,
 }: NavigationProps) {
   return (
     <>
@@ -31,13 +33,13 @@ export default function Navigation({
                   : `/${text.toLowerCase()}`
               }
               onClick={(e) => {
-                if (text === "AboutUs") {
-                  e.preventDefault();
-                  onGoToAbout();
-                }
+                e.preventDefault();
                 if (text === "Showcase") {
-                  e.preventDefault();
                   onGoToShowcase();
+                } else if (text === "Services") {
+                  onGoToServices();
+                } else if (text === "AboutUs") {
+                  onGoToAbout();
                 }
               }}
               className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"

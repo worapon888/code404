@@ -9,25 +9,18 @@ import GlitchLogo from "../GlitchLogo";
 import WormholeCameraZoom from "../camera/WormholeCameraZoom";
 import LightSpeedParticles from "../effect/LightSpeedParticles";
 import AboutSectionInsideCanvas from "../about/AboutSectionInsideCanvas";
-import ResetCameraOnBack from "../camera/ResetCameraOnBack";
 import ShowcaseSectionInsideCanvas from "../showcase/ShowcaseSectionInsideCanvas";
 
 export default function CanvasBG({
   isLoaded,
-  showAbout,
-  startAboutMotion,
-  setShowAbout,
-  showShowcase,
-  startShowcaseMotion,
-  setShowShowcase,
+  activeSection,
+  setActiveSection,
 }: {
   isLoaded: boolean;
-  showAbout: boolean;
-  startAboutMotion: boolean;
-  setShowAbout: (v: boolean) => void;
-  showShowcase: boolean;
-  startShowcaseMotion: boolean;
-  setShowShowcase: (v: boolean) => void;
+  activeSection: "home" | "about" | "showcase" | "services" | null;
+  setActiveSection: (
+    v: "home" | "about" | "showcase" | "services" | null
+  ) => void;
 }) {
   const [showWarpEffect, setShowWarpEffect] = useState(false);
 
@@ -40,24 +33,24 @@ export default function CanvasBG({
         <ComplexLines />
         <FloatingBubbles isLoaded={isLoaded} />
         {/* ✅ About Section */}
-        {startAboutMotion && (
+        {activeSection === "about" && (
           <AboutSectionInsideCanvas
-            show={showAbout}
-            onClose={() => setShowAbout(false)}
+            show={activeSection === "about"}
+            onClose={() => setActiveSection(null)}
             setShowWarpEffect={setShowWarpEffect}
           />
         )}
 
         {/* ✅ Showcase Section */}
-        {startShowcaseMotion && (
+        {activeSection === "showcase" && (
           <ShowcaseSectionInsideCanvas
-            show={showShowcase}
-            onClose={() => setShowShowcase(false)}
+            show={activeSection === "showcase"}
+            onClose={() => setActiveSection(null)}
             setShowWarpEffect={setShowWarpEffect}
           />
         )}
         {showWarpEffect && <LightSpeedParticles active />}
-        {!showAbout && <ResetCameraOnBack trigger={!showAbout} />}
+
         <GlitchLogo isLoaded={isLoaded} />
         <WormholeCameraZoom isLoaded={isLoaded} />
         <EffectComposer>

@@ -19,19 +19,26 @@ export default function Hero() {
 
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
-  const [showAbout, setShowAbout] = useState(false);
-  const [startAboutMotion, setStartAboutMotion] = useState(false);
-  const [showShowcase, setShowShowcase] = useState(false);
-  const [startShowcaseMotion, setStartShowcaseMotion] = useState(false);
+  const [activeSection, setActiveSection] = useState<
+    "home" | "about" | "showcase" | "services" | null
+  >(null);
 
   const handleGoToAbout = () => {
-    setStartAboutMotion(true);
-    setTimeout(() => setShowAbout(true), 800);
+    if (activeSection !== "about") {
+      setActiveSection("about");
+    }
   };
 
   const handleGoToShowcase = () => {
-    setStartShowcaseMotion(true);
-    setTimeout(() => setShowShowcase(true), 800);
+    if (activeSection !== "showcase") {
+      setActiveSection("showcase");
+    }
+  };
+
+  const handleGoToServices = () => {
+    if (activeSection !== "services") {
+      setActiveSection("services");
+    }
   };
 
   useEffect(() => {
@@ -91,12 +98,8 @@ export default function Hero() {
       <ParallaxTiltEffect>
         <CanvasBG
           isLoaded={isLoaded}
-          showAbout={showAbout}
-          startAboutMotion={startAboutMotion}
-          setShowAbout={setShowAbout}
-          showShowcase={showShowcase}
-          startShowcaseMotion={startShowcaseMotion}
-          setShowShowcase={setShowShowcase}
+          activeSection={activeSection}
+          setActiveSection={setActiveSection}
         />
       </ParallaxTiltEffect>
 
@@ -106,6 +109,7 @@ export default function Hero() {
         <Navigation
           onGoToAbout={handleGoToAbout}
           onGoToShowcase={handleGoToShowcase}
+          onGoToServices={handleGoToServices}
           topNavRef={topNavRef}
           contactRef={contactRef}
           bottomNavRef={bottomNavRef}
