@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
 
-const COUNT = 500;
+const COUNT = 600;
 
 export default function LightSpeedParticles({ active }: { active: boolean }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
@@ -16,7 +16,7 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
   const { viewport, camera } = useThree();
 
   const geometry = useMemo(() => {
-    const geo = new THREE.PlaneGeometry(0.03, 1.5, 1, 1);
+    const geo = new THREE.PlaneGeometry(0.04, 2.5, 1, 1);
     geo.rotateX(Math.PI / 2); // หันให้พุ่งตามแนว Z
     return geo;
   }, []);
@@ -40,20 +40,23 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
       colors[i * 3 + 1] = color.g;
       colors[i * 3 + 2] = color.b;
 
-      // 🌪️ สุ่มรอบกล้องแบบ polar
-      const radius = Math.random() * (viewport.width * 0.25); // ปรับตามขนาดกล้อง
+      // 🌪️ สุ่มรอบกล้องแบบ polar (cone)
+      const t = Math.pow(Math.random(), 2); // กระจุกกลางจอ
+      const maxRadius = viewport.width * 2.0;
+      const radius = t * maxRadius;
       const angle = Math.random() * Math.PI * 2;
-      const height = (Math.random() - 0.5) * 2;
-
+      const height = (Math.random() - 0.5) * 6.0;
       const offset = new THREE.Vector3(
         Math.cos(angle) * radius,
         Math.sin(angle) * radius,
         height
       );
-
       const pos = direction.clone().multiplyScalar(-20).add(offset).add(camPos);
       positions.current.push(pos);
-      speeds.current.push(0.5 + Math.random() * 0.5);
+
+      // เส้นกลางจอเร็วและยาวกว่า
+      const speed = 0.3 + Math.random() * 0.15;
+      speeds.current.push(speed);
     }
 
     geometry.setAttribute(
@@ -97,9 +100,12 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
 
       const dist = pos.distanceTo(camPos);
       if (dist < 1.5) {
-        const radius = Math.random() * (viewport.width * 0.15);
+        // สุ่มใหม่แบบ polar (cone)
+        const t = Math.pow(Math.random(), 2);
+        const maxRadius = viewport.width * 1.7;
+        const radius = t * maxRadius;
         const angle = Math.random() * Math.PI * 2;
-        const height = (Math.random() - 0.5) * 2;
+        const height = (Math.random() - 0.5) * 6.0;
         const offset = new THREE.Vector3(
           Math.cos(angle) * radius,
           Math.sin(angle) * radius,
@@ -121,8 +127,8 @@ export default function LightSpeedParticles({ active }: { active: boolean }) {
     <>
       {/* ⚡ Warp Flash Effect */}
       <mesh ref={flashRef} position={[0, 0, -2]}>
-        <planeGeometry args={[viewport.width * 2, viewport.height * 2]} />
-        <meshBasicMaterial color="white" transparent opacity={1} />
+        <planeGeometry args={[viewport.width * 3, viewport.height * 3]} />
+        <meshBasicMaterial color="white" transparent opacity={0.18} />
       </mesh>
 
       {/* 🌌 LightSpeed Particle Field */}
@@ -147,19 +153,30 @@ const LightSpeedShader = {
     attribute vec3 instanceColor;
     varying vec3 vColor;
     varying float vAlpha;
+    varying float vCenterFade;
     void main() {
       vColor = instanceColor;
       vAlpha = uv.y;
-      vec4 modelPosition = instanceMatrix * vec4(position, 1.0);
+      // fade กลางจอ
+      float dist = length(position.xy);
+      vCenterFade = 1.0 - smoothstep(0.0, 0.7, dist);
+      // ปลายเส้นแหลม: scale X ตาม vAlpha (ปลายเล็ก)
+      vec3 pos = position;
+      pos.x *= mix(0.2, 1.0, vAlpha); // ปลายเส้นแหลม
+      vec4 modelPosition = instanceMatrix * vec4(pos, 1.0);
       gl_Position = projectionMatrix * viewMatrix * modelPosition;
     }
   `,
   fragment: `
     varying vec3 vColor;
     varying float vAlpha;
+    varying float vCenterFade;
     void main() {
-      float fade = smoothstep(1.0, 0.2, vAlpha); // ปลายจาง
-      gl_FragColor = vec4(vColor, fade * 0.7);
+      float fade = smoothstep(1.0, 0.01, vAlpha); // ขอบ fade นุ่มขึ้น
+      float centerGlow = mix(0.5, 0.85, vCenterFade); // กลางจอ soft กว่าเดิม
+      float alpha = fade * centerGlow * 0.6; // ลดความเข้ม เพิ่มความโปร่งใส
+      gl_FragColor = vec4(vColor, alpha);
+      if (fade < 0.01) discard; // ปลายเส้นโปร่งใส
     }
   `,
 };

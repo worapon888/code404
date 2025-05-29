@@ -54,8 +54,8 @@ export function animateEnter({
 
       gsap.fromTo(
         gl.domElement,
-        { filter: "blur(1px)" },
-        { filter: "blur(0px)", duration: 0.4, delay: 0.2 }
+        { filter: "blur(1.2px)" },
+        { filter: "blur(0px)", duration: 0.5, delay: 0.2 }
       );
 
       shakeTl.play();

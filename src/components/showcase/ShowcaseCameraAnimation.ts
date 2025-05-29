@@ -52,11 +52,10 @@ export function animateEnterShowcase({
       setShowWarpEffect(true);
       setTimeout(() => setShowWarpEffect(false), 1500);
       setTimeout(() => setReadyToSpawn(true), 500);
-
       gsap.fromTo(
         gl.domElement,
-        { filter: "blur(1px)" },
-        { filter: "blur(0px)", duration: 0.4, delay: 0.2 }
+        { filter: "blur(1.2px)" },
+        { filter: "blur(0px)", duration: 0.5, delay: 0.2 }
       );
 
       shakeTl.play();
