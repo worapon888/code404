@@ -1,119 +1,70 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
+
 import CanvasBG from "./CanvasBG";
 import Navigation from "./Navigation";
 import LoadingScreen from "./LoadingScreen";
 import EnableSoundButton from "../canvas/AmbientSound";
 import ParallaxTiltEffect from "../effect/ParallaxTiltEffect";
+import { useLoading } from "@/context/LoadingContext";
 
 export default function Hero() {
-  // ✅ ใส่ generic เพื่อระบุชนิดให้ TypeScript
-  const containerRef = useRef<HTMLDivElement>(null);
-  const logoRef = useRef<HTMLDivElement>(null);
-  const subRef = useRef<HTMLDivElement>(null);
+  const { isLoaded, setIsLoaded } = useLoading();
+
+  const [progress, setProgress] = useState(0);
+  const [showContent, setShowContent] = useState(isLoaded); // ✅ ใช้ isLoaded เป็น default
+  const progressRef = useRef(0);
+  const hasStartedRef = useRef(false);
+
   const topNavRef = useRef<HTMLDivElement>(null);
-  const contactRef = useRef<HTMLDivElement>(null);
   const bottomNavRef = useRef<HTMLDivElement>(null);
 
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [activeSection, setActiveSection] = useState<
-    "home" | "about" | "showcase" | "services" | null
-  >(null);
-
-  const handleGoToAbout = () => {
-    if (activeSection !== "about") {
-      setActiveSection("about");
-    }
-  };
-
-  const handleGoToShowcase = () => {
-    if (activeSection !== "showcase") {
-      setActiveSection("showcase");
-    }
-  };
-
-  const handleGoToServices = () => {
-    if (activeSection !== "services") {
-      setActiveSection("services");
-    }
-  };
-
+  // ✅ ไล่ progress ทีละเฟรม
   useEffect(() => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 5 + 2;
-      if (progress >= 100) {
-        progress = 100;
-        clearInterval(interval);
-        setTimeout(() => setIsLoaded(true), 300);
+    if (isLoaded) {
+      setProgress(100); // ถ้าโหลดแล้ว เคาะ progress = 100
+      return;
+    }
+
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
+    const animateProgress = () => {
+      if (progressRef.current >= 100) {
+        progressRef.current = 100;
+        setProgress(100);
+        return;
       }
-      setLoadingProgress(progress);
-    }, 60);
-    return () => clearInterval(interval);
-  }, []);
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
+      progressRef.current += Math.random() * 4 + 1;
+      setProgress(Math.floor(progressRef.current));
+      requestAnimationFrame(animateProgress);
+    };
 
-      tl.fromTo(
-        logoRef.current,
-        { opacity: 0, y: 60, scale: 1.1 },
-        { opacity: 1, y: 0, scale: 1, duration: 2.2, ease: "power4.out" }
-      );
-
-      tl.fromTo(
-        subRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 0.7, y: 0, duration: 1.8, ease: "power2.out" },
-        ">0.2"
-      );
-
-      tl.from(
-        [topNavRef.current, bottomNavRef.current, contactRef.current],
-        {
-          y: 20,
-          opacity: 0,
-          duration: 1,
-          ease: "power3.out",
-          stagger: 0,
-        },
-        ">0.3"
-      );
-    }, containerRef);
-
-    return () => ctx.revert();
+    requestAnimationFrame(animateProgress);
   }, [isLoaded]);
 
+  // ✅ แสดง Loading เฉพาะตอนยังไม่เคยโหลด
+  const shouldShowLoading = !isLoaded && !showContent;
+
   return (
-    <section
-      ref={containerRef}
-      className="relative w-full h-screen bg-black text-white flex items-center justify-center overflow-hidden"
-    >
+    <section className="relative w-full h-screen bg-black text-white flex items-center justify-center overflow-hidden">
       <EnableSoundButton />
       <ParallaxTiltEffect>
-        <CanvasBG
-          isLoaded={isLoaded}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-        />
+        <CanvasBG isLoaded={showContent} />
       </ParallaxTiltEffect>
 
-      {!isLoaded ? (
-        <LoadingScreen progress={loadingProgress} />
-      ) : (
-        <Navigation
-          onGoToAbout={handleGoToAbout}
-          onGoToShowcase={handleGoToShowcase}
-          onGoToServices={handleGoToServices}
-          topNavRef={topNavRef}
-          contactRef={contactRef}
-          bottomNavRef={bottomNavRef}
+      {shouldShowLoading ? (
+        <LoadingScreen
+          progress={progress}
+          onComplete={() => {
+            setIsLoaded(true);
+            setShowContent(true);
+          }}
         />
+      ) : (
+        <Navigation topNavRef={topNavRef} bottomNavRef={bottomNavRef} />
       )}
     </section>
   );

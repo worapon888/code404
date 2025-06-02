@@ -21,14 +21,14 @@
   }
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-mono), monospace;
-  font-size: 16px;
-  line-height: 1.6;
-  letter-spacing: 0.02em;
-  -webkit-font-smoothing: antialiased;
+html,
+body,
+#__next {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 @keyframes wave1 {
   0%,
@@ -66,4 +66,260 @@ body {
 }
 .animate-wave3 {
   animation: wave3 1s infinite ease-in-out;
+}
+
+@keyframes light-beam {
+  0% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%);
+  }
+}
+
+@keyframes light-beam-delayed {
+  0% {
+    transform: translateX(100%) translateY(100%);
+  }
+  100% {
+    transform: translateX(-100%) translateY(-100%);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulse-delayed {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.animate-light-beam {
+  animation: light-beam 3s linear infinite;
+}
+
+.animate-light-beam-delayed {
+  animation: light-beam-delayed 3s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-pulse-delayed {
+  animation: pulse-delayed 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+@keyframes ping-slow {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes glitch {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  20% {
+    transform: translate(-1px, 0);
+  }
+  40% {
+    transform: translate(1px, 0);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(1px, 0);
+  }
+}
+
+@keyframes flicker {
+  0%,
+  19%,
+  21%,
+  23%,
+  25%,
+  54%,
+  56%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.2;
+  }
+}
+
+@keyframes progress-glow {
+  0% {
+    filter: drop-shadow(0 0 2px #0ff);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px #0ff);
+  }
+  100% {
+    filter: drop-shadow(0 0 2px #0ff);
+  }
+}
+
+.animate-ping-slow {
+  animation: ping-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-glitch {
+  animation: glitch 1.5s infinite;
+}
+
+.animate-flicker {
+  animation: flicker 1.5s infinite;
+}
+
+.animate-progress-glow {
+  animation: progress-glow 2s ease-in-out infinite;
+}
+
+.glow-holo {
+  text-shadow: 0 0 4px #0ff, 0 0 10px #0ff;
+}
+
+/* ใน global.css หรือ style tag */
+.hologram-text::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    rgba(0, 255, 255, 0.05) 0%,
+    rgba(0, 255, 255, 0.25) 50%,
+    rgba(0, 255, 255, 0.05) 100%
+  );
+  animation: scan 2s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow: 0 0 6px rgba(0, 255, 255, 0.6), 0 0 12px rgba(0, 255, 255, 0.4);
+  }
+  50% {
+    text-shadow: 0 0 2px rgba(0, 255, 255, 0.3), 0 0 8px rgba(0, 255, 255, 0.2);
+  }
+}
+
+.animate-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+@keyframes glitch {
+  0% {
+    clip-path: inset(80% 0 0 0);
+    transform: translate(-2px, -2px);
+    opacity: 0.7;
+  }
+  10% {
+    clip-path: inset(10% 0 85% 0);
+    transform: translate(2px, 1px);
+  }
+  20% {
+    clip-path: inset(40% 0 30% 0);
+    transform: translate(-1px, 2px);
+    opacity: 0.4;
+  }
+  30%,
+  100% {
+    clip-path: none;
+    transform: none;
+    opacity: 0;
+  }
+}
+
+.glitch-text {
+  position: relative;
+  animation: glow 3s ease-in-out infinite;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  overflow: hidden;
+  color: cyan;
+  opacity: 0.6;
+  pointer-events: none;
+  text-shadow: 0 0 4px rgba(0, 255, 255, 0.5);
+}
+
+.glitch-text::before {
+  animation: glitch 2s infinite linear alternate-reverse;
+  transform: translate(-1px, -1px);
+  color: #00ffff;
+}
+
+.glitch-text::after {
+  animation: glitch 3s infinite linear alternate;
+  transform: translate(1px, 1px);
+  color: #00ffff;
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.beam-glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    rgba(0, 255, 255, 0) 0%,
+    rgba(0, 255, 255, 0.25) 50%,
+    rgba(0, 255, 255, 0) 100%
+  );
+  animation: scanline 2s infinite;
+  pointer-events: none;
+  z-index: 1;
 }

@@ -1,64 +1,90 @@
+"use client";
+import { useEffect } from "react";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { FaFacebookF, FaLinkedinIn, FaDev, FaXTwitter } from "react-icons/fa6";
+import gsap from "gsap";
 
 type NavigationProps = {
-  onGoToAbout: () => void;
-  onGoToShowcase: () => void;
-  onGoToServices: () => void;
   topNavRef: React.RefObject<HTMLDivElement | null>;
-  contactRef: React.RefObject<HTMLDivElement | null>;
   bottomNavRef: React.RefObject<HTMLDivElement | null>;
 };
 
+const routeMap = {
+  "My Services": "/services",
+  AboutUs: "/about",
+  Contact: "/contact",
+} as const;
+
+type RouteKey = keyof typeof routeMap;
+
 export default function Navigation({
-  onGoToAbout,
-  onGoToShowcase,
-  onGoToServices,
   topNavRef,
-  contactRef,
   bottomNavRef,
 }: NavigationProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleClick = (text: RouteKey) => {
+    const path = routeMap[text];
+    if (path) router.push(path);
+  };
+
+  const isActive = (text: RouteKey) => {
+    const path = routeMap[text];
+    return pathname === path;
+  };
+
+  // ✅ ใส่ animation เมื่อ component แสดง
+  useEffect(() => {
+    if (topNavRef.current) {
+      // ซ่อนก่อน (ทันทีเมื่อ mount)
+      gsap.set(topNavRef.current, { y: -20, opacity: 0 });
+
+      gsap.to(topNavRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 1.0,
+        ease: "power3.out",
+        delay: 1.2,
+      });
+    }
+
+    if (bottomNavRef.current) {
+      gsap.set(bottomNavRef.current, { y: 20, opacity: 0 });
+
+      gsap.to(bottomNavRef.current, {
+        y: 0,
+        opacity: 1,
+        duration: 1.0,
+        ease: "power3.out",
+        delay: 1.2,
+      });
+    }
+  }, []);
+
   return (
     <>
       <div
         ref={topNavRef}
         className="absolute top-6 left-1/2 -translate-x-1/2 z-30 flex space-x-2 text-sm font-mono"
       >
-        {["Showcase", "Services", "AboutUs"].map((text, index, arr) => (
+        {(Object.keys(routeMap) as RouteKey[]).map((text, index, arr) => (
           <div key={text} className="flex items-center space-x-2">
-            <Link
-              href={
-                text === "AboutUs" || text === "Showcase"
-                  ? "#"
-                  : `/${text.toLowerCase()}`
-              }
-              onClick={(e) => {
-                e.preventDefault();
-                if (text === "Showcase") {
-                  onGoToShowcase();
-                } else if (text === "Services") {
-                  onGoToServices();
-                } else if (text === "AboutUs") {
-                  onGoToAbout();
-                }
-              }}
-              className="hover:text-cyan-400 transition border-b border-transparent hover:border-cyan-400"
+            <button
+              onClick={() => handleClick(text)}
+              className={`hover:text-cyan-400 transition border-b ${
+                isActive(text)
+                  ? "text-cyan-400 border-cyan-400"
+                  : "border-transparent hover:border-cyan-400"
+              }`}
             >
               {text}
-            </Link>
+            </button>
 
             {index < arr.length - 1 && <span>/</span>}
           </div>
         ))}
-      </div>
-
-      <div ref={contactRef} className="absolute top-6 right-6 z-30">
-        <Link
-          href="#contact"
-          className="px-4 py-1.5 text-sm font-mono border border-white/30 rounded-lg hover:bg-white/10 transition backdrop-blur-sm"
-        >
-          Contact Us
-        </Link>
       </div>
 
       <div
@@ -71,8 +97,9 @@ export default function Navigation({
             href="https://..."
             target="_blank"
             rel="noopener noreferrer"
+            className="hover:text-cyan-400 transition"
           >
-            <Icon className="hover:text-cyan-400 transition" />
+            <Icon />
           </Link>
         ))}
         <p className="text-xs font-mono opacity-60">
